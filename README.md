@@ -1,0 +1,1 @@
+Notes from studying reinforcement learning from many different materials including Sutton and Barto book, David Silver youtube series and openai reinforcement learning program
