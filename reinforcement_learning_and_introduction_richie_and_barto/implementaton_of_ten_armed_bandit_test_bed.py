@@ -60,8 +60,9 @@ class Bandit:
     def act(self):
         # If the UCB param value is not none then we would be using the UCB technique
         if self.UCB_param is not None:
-            # we would be calculating the UCB values for all our actions
-            UCB_values = self.q_estimation_karms + (self.UCB_param * np.sqrt(np.log(self.time + 1)/self.action_count + 1e-5))
+            # we would be calculating the UCB values for all our action
+                
+            UCB_values = self.q_estimation_karms + (self.UCB_param * np.sqrt((np.log(self.time + 1.01))/(self.action_count + 1e-5)))
             # find the maximum ucb value
             UCB_max = np.max(UCB_values)
             # make a selection by randomly selecting from the list any value that has the highest UCB value. Note: np.where returns indexes
@@ -412,10 +413,81 @@ def figure_2_3(runs=2000, time=1000):
     plt.savefig("figure_2_3.png")
     plt.close()
     
+def figure_2_4(runs=2000, time=1000):
+    bandits = []
+    bandits.append(Bandit(epsilon=0, UCB_param=2, sample_averages=True))
+    bandits.append(Bandit(epsilon=0.1, sample_averages=True))
     
+    _, average_rewards = simulate(runs, time, bandits)
+    plt.plot(average_rewards[0], label="UBC c=2")
+    plt.plot(average_rewards[1], label="epsilon-greedy epsilon=0.1")
+    
+    plt.xlabel("Steps")
+    plt.ylabel("Average reward")
+    
+    plt.legend()
+    plt.savefig("figure_2_4.png")
+    plt.close()
+    
+    
+def figure_2_5(runs=2000, time=1000):
+    bandits = []
+    bandits.append(Bandit(gradient=True, step_size=0.1, gradient_baseline=True, true_reward=4))
+    bandits.append(Bandit(gradient=True, step_size=0.1, gradient_baseline=False, true_reward=4))
+    bandits.append(Bandit(gradient=True, step_size=0.4, gradient_baseline=True, true_reward=4))
+    bandits.append(Bandit(gradient=True, step_size=0.4, gradient_baseline=False, true_reward=4))
+    
+    best_actions, _ = simulate(runs, time, bandits)
+    labels = [r'$\alpha = 0.1$, with baseline',
+              r'$\alpha = 0.1$, without baseline',
+              r'$\alpha = 0.4$, with baseline',
+              r'$\alpha = 0.4$, without baseline']
 
+    
+    for i in range(len(bandits)):
+        plt.plot(best_actions[i], label=labels[i])
+    plt.xlabel("Steps")
+    plt.ylabel("% optimal actions")
+    
+    plt.legend()
+    plt.savefig("figure_2_5.png")
+    plt.close()
+
+
+def figure_2_6(runs=2000, time=1000):
+    labels = ["epsilon-greedy", "gradient-bandit", 'UCB', "optimistic initialization"]
+    generators = [lambda epsilon: Bandit(epsilon=epsilon, sample_averages=True),
+                  lambda alpha: Bandit(gradient=True, step_size=alpha, gradient_baseline=True),
+                  lambda coef: Bandit(epsilon=0, UCB_param=coef, sample_averages=True),
+                  lambda initial: Bandit(epsilon=0, initial=initial, step_size=0.1)]
+    parameters = [np.arange(-7, -1, dtype=np.float64),
+                  np.arange(-5, 2, dtype=np.float64),
+                  np.arange(-4, 3, dtype=np.float64),
+                  np.arange(-2, 3, dtype=np.float64)]
+
+    bandits = []
+    for generator, parameter in zip(generators, parameters):
+        for param in parameter:
+            bandits.append(generator(pow(2, param)))
+    
+    _, average_rewards = simulate(runs, time, bandits)
+    rewards = np.mean(average_rewards, axis=1)
+    
+    i = 0
+    for label, parameter in zip(labels, parameters):
+        l = len(parameter)
+        plt.plot(parameter, rewards[i:i+l], label=label)
+        i += l
+    plt.xlabel('Parameter($2^x$)')
+    plt.ylabel('Average reward')
+    plt.legend()
+
+    plt.savefig('figure_2_6.png')
+    plt.close()
+    
+    
 if __name__ == '__main__':
-    figure_2_3()
+    figure_2_6()
     
     
 
