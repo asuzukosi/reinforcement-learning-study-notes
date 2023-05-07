@@ -75,7 +75,7 @@ class Bandit:
             # to scale down exponents as not to get too large we substract it by the max
             max_value = np.max(self.q_estimation_karms)
             # calculate the softmax probability with the scaled down values
-            self.action_prob = np.exp(max_value - self.q_estimation_karms) / np.sum(np.exp(max_value - self.q_estimation_karms))
+            self.action_prob = np.exp(self.q_estimation_karms - max_value) / np.sum(np.exp(self.q_estimation_karms - max_value))
             # select an action from the indices baseed on the softmax probability distribution
             selected_action = np.random.choice(self.indices, p=self.action_prob)
             # return the selected action
