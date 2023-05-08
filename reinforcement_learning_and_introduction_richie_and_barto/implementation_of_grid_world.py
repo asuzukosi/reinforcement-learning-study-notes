@@ -205,6 +205,6 @@ def figure_3_5():
         
         
 if __name__ == "__main__":
-    # figure_3_2()
-    # figure_3_2_linear_system()
+    figure_3_2()
+    figure_3_2_linear_system()
     figure_3_5()
